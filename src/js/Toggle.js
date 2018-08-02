@@ -3,37 +3,52 @@ import ReactDOM from "react-dom";
 import {Switch} from './Switch'
 import "./app.css";
 
-const ToggleContext = React.createContext()
+const ToggleContext = React.createContext();
+const ToggleConsumer = (props) =>{ 
+return (<ToggleContext.Consumer>
+    {
+        context =>{
+            if(!context){
+                throw new Error('Toggle compount compoents must be rendered within the Toggle context');
+            }
+            return props.children(context)
+        } 
+    }
+</ToggleContext.Consumer>)
+}
 
 class Toggle extends Component{
     static On = ({children})=>(
-        <ToggleContext.Consumer>
+        <ToggleConsumer>
             { contextValue => contextValue.on ? children : null }
-        </ToggleContext.Consumer>
+        </ToggleConsumer>
     )
 
     static Off = ({children})=>(
-        <ToggleContext.Consumer>
+        <ToggleConsumer>
             { contextValue => contextValue.on ? null : children }
-        </ToggleContext.Consumer>
+        </ToggleConsumer>
     )
 
     static Button = (props)=>(
-        <ToggleContext.Consumer>
+        <ToggleConsumer>
             { contextValue => (<Switch on={contextValue.on} onClick={contextValue.toggle} {...props} />) }
-        </ToggleContext.Consumer>
+        </ToggleConsumer>
     )
     
-    state = { on : true};
+
     toggle = () => this.setState( ({on}) =>({on : !on}), 
         () => this.props.onToggle(this.state.on) )
+
+    state = { on : false, toggle : this.toggle};
+
     constructor(props){
         super(props);
     }
 
     render ( ){
         return (
-            <ToggleContext.Provider value={{on : this.state.on, toggle : this.toggle }}>
+            <ToggleContext.Provider value={this.state}>
                     {this.props.children}
             </ToggleContext.Provider>
         )
@@ -49,9 +64,11 @@ const Usage = ({onToggle = (...args) => console.log('onToggle', ...args), }) =>{
                 <Toggle.Button />
             </div>
             
-        </Toggle >
+        </Toggle>
     )
 } 
+
+Usage.title = "Render Props"
 
 ReactDOM.render(
     <div  style={{
