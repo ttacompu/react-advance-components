@@ -3,24 +3,42 @@ import ReactDOM from "react-dom";
 import {Switch} from './Switch'
 import "./app.css";
 
+const callAll = (...fns) =>(...args) =>
+    fns.forEach(fn => fn && fn(...args))
 class Toggle extends Component{
 
-    state = { on : false};
+    static defaultProps ={
+        initOn : false,
+        reset : () =>{}
+    }
+    initState ={ on : this.props.initOn};
+    state = this.initState;
+
     toggle = () => 
         this.setState( 
             ({on}) =>({on: !on}),
-            () => this.props.onToggle(this.state.on)
+            () => 
+            this.props.onToggle(this.state.on)
          )
+
+    reset = () =>
+         this.setState(this.initState, () => 
+         this.props.onReset("Reset happen!!!"))
+
     getStateAndHelper(){
         return {
             on : this.state.on,
             toggle : this.toggle,
-            togglerProps : {
-                onClick : this.toggle,
-                'aria-pressed' : this.state.on
-            }
+            reset : this.reset,
+            getTogglerProps:  this.getTogglerProps
         }
     }
+
+    getTogglerProps =( {onClick, ...props})=>(
+            {
+                onClick : callAll(onClick, this.toggle),
+                ...props
+            })
 
     render(){
         return this.props.children(this.getStateAndHelper());
@@ -28,18 +46,32 @@ class Toggle extends Component{
 
 }
 
-const Usage = ({onToggle = (...args) => console.log('onToggle', ...args), }) =>(
-    <Toggle onToggle={onToggle}>
+const Usage = ({initOn=true, onToggle = (...args) => console.log('onToggle', ...args),
+onReset = (...args) => console.log('onReset', ...args),
+onButtonClick = () => console.log("Button is clicked!")
+
+}) =>(
+    <Toggle initOn={initOn} onToggle={onToggle} onReset={onReset}>
     {
-        ({on, togglerProps}) =>
+        ({on, reset, getTogglerProps}) =>
         {
             const status =  on ? "on" : "off";
+            const commandStatus =  on ? "off" : "on";
             return(
                 <div>
                     {`Button is ${status} `}
-                    <Switch on={on} {...togglerProps} />
-                    <button aria-label="custom-button" {...togglerProps}>
-                            {`${status}`}
+                    <Switch {...getTogglerProps({on})}  />
+                    < button 
+                    {...getTogglerProps({
+                        'arial-label' : 'custom-button',
+                        id : 'id1',
+                        onClick : onButtonClick
+                    })} >
+                            {`${commandStatus}`}
+                    </button>
+
+                     <button  onClick = {reset}>
+                            reset
                     </button>
                 </div>)            
         }
