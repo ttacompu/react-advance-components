@@ -9,7 +9,8 @@ class Toggle extends Component{
 
     static defaultProps ={
         initOn : false,
-        reset : () =>{}
+        reset : () =>{},
+        stateReducer : (state, changes) => changes
     }
     initState ={ on : this.props.initOn};
     state = this.initState;
