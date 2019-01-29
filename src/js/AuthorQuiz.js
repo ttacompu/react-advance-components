@@ -3,6 +3,10 @@ import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import {Geolocation}     from './Geolocation';
 
+const FunctionAsChild  = ({children}) => children('something!');
+
+
+
 const Button = ({ children }) => (
     <button>
         {children}
@@ -59,6 +63,11 @@ class PostList extends Component {
                     <span>Click me!</span>
                 </Button>
                <Geolocation />
+               <FunctionAsChild>
+                   {
+                       (param)=>(<div>Hello {param}</div>)
+                   }
+               </FunctionAsChild>
             </div>
         )
     }
