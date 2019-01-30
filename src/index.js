@@ -1,3 +1,3 @@
 import './app.css'
 import './bootstrap.css'
-import  "./js/AuthorQuiz" ;
+import './js/JsonSchema'
